@@ -1,31 +1,51 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# OcrDemo – DO Scanner (KMP: Android + iOS)
 
-* [/iosApp](./iosApp/iosApp) contains an iOS application. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+Scans Daikin DO numbers from picking lists and sends them to the **ocr-extension** (Chrome), which auto-selects them in the TMS.
+Kotlin Multiplatform + Compose Multiplatform version.
 
-* [/shared](./shared/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./shared/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./shared/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./shared/src/jvmMain/kotlin)
-    folder is the appropriate location.
+## Features
 
-### Running the apps
+| Feature | Status |
+|---|---|
+| Scan QR (main method) | ✅ |
+| Scan Text – live camera OCR, reads the number under "Number/Date" | ✅ |
+| Type – manual DO entry (digits only, 9 digits) | ✅ |
+| 9-digit check + duplicate check | ✅ |
+| Send to Firebase → extension auto-ticks in TMS | ✅ |
+| Status per DO: sending / waiting for PC / ticked ✓ / not found ✗ | ✅ |
+| Vibration (short = accepted, long = duplicate/invalid) | ✅ |
+| Settings page with secret code + Copy | ✅ |
+| Dark mode | ✅ |
+| Tested on Android device | ⏳ |
 
-Use the run configurations provided by the run widget in your IDE's toolbar. You can also use these commands and options:
+## How it works
 
-- Android app: `./gradlew :androidApp:assembleDebug`
-- iOS app: open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+```
+Phone app ──► Firebase (lists/<code>/pending) ◄── ocr-extension ──► TMS page (search + tick DO)
+    ▲                                                   │
+    └──────── reads lists/<code>/done | failed ◄────────┘
+```
 
-### Running tests
+- Same Firebase database and format as the native app, so the extension works with either app.
+- Pairing: copy the secret code from **Settings (⚙)** → paste it into the extension side panel.
 
-Use the run button in your IDE's editor gutter, or run tests using Gradle tasks:
+## Project structure
 
-- Android tests: `./gradlew :shared:testAndroidHostTest`
-- iOS tests: `./gradlew :shared:iosSimulatorArm64Test`
+| Folder | What's inside |
+|---|---|
+| `shared/src/commonMain` | Shared code for both phones: screens, DO rules, Firebase, OCR logic |
+| `shared/src/androidMain` | Android only: CameraX + ML Kit, storage, vibration |
+| `shared/src/iosMain` | iPhone only: AVFoundation + Vision, storage, haptics |
+| `androidApp` | Android app entry point |
+| `iosApp` | Xcode project (iPhone app entry point) |
 
----
+## Run
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+- **Android:** open this folder in Android Studio → select `androidApp` → Run.
+- **iPhone:** open `iosApp/iosApp.xcodeproj` in Xcode (or select `iosApp` in Android Studio) → choose a device → Run.
+  - Set your own **Team** in Signing & Capabilities.
+  - Camera features need a real device (the simulator has no camera).
+
+## Libraries
+
+KScan (QR), Ktor (HTTP), kotlinx-serialization-json, ML Kit Text Recognition + CameraX (Android), Apple Vision + AVFoundation (iOS).
