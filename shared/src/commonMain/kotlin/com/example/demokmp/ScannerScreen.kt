@@ -25,6 +25,7 @@ fun ScannerScreen() {
     val secretCode = remember { getSecretCode() }
     var showCode by remember { mutableStateOf(false) }
     var scanningQr by remember { mutableStateOf(false) }   // NEW: is the camera open?
+    var scanningText by remember { mutableStateOf(false) }   // is the text camera open?
     val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()                            // lets us run "suspend" work
     val status =
@@ -70,11 +71,17 @@ fun ScannerScreen() {
     MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
         Surface(modifier = Modifier.fillMaxSize()) {
             if (scanningQr) {
-                // Camera screen
                 QrScanner(
                     lastMessage = message,
                     onCode = { addDo(it) },
                     onClose = { scanningQr = false }
+                )
+            } else if (scanningText) {
+                TextScanner(
+                    alreadyHave = scanned,
+                    lastMessage = message,
+                    onCode = { addDo(it) },
+                    onClose = { scanningText = false }
                 )
             } else {
                 // Main screen
@@ -92,9 +99,9 @@ fun ScannerScreen() {
                         ) { Text("Scan QR") }
 
                         FilledTonalButton(
-                            onClick = { message = "Text scan (OCR) comes later" },
+                            onClick = { message = ""; scanningText = true },
                             modifier = Modifier.weight(1f)
-                        ) { Text("Text") }
+                        ) { Text("Scan Text") }
 
                         OutlinedButton(
                             onClick = { showCode = true },
