@@ -72,6 +72,7 @@ fun ScannerScreen() {
                 SettingsScreen(
                     secretCode = secretCode,
                     onCopy = { clipboard.setText(AnnotatedString(secretCode)); message = "Code copied" },
+                    onClear = { scanned.clear(); status.clear(); message = "List cleared" },
                     onBack = { showSettings = false }
                 )
             } else {
