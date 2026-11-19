@@ -3,21 +3,6 @@
 Scans Daikin DO numbers from picking lists and sends them to the **ocr-extension** (Chrome), which auto-selects them in the TMS.
 Kotlin Multiplatform + Compose Multiplatform version.
 
-## Features
-
-| Feature | Status |
-|---|---|
-| Scan QR (main method) | ✅ |
-| Scan Text – live camera OCR, reads the number under "Number/Date" | ✅ |
-| Type – manual DO entry (digits only, 9 digits) | ✅ |
-| 9-digit check + duplicate check | ✅ |
-| Send to Firebase → extension auto-ticks in TMS | ✅ |
-| Status per DO: sending / waiting for PC / ticked ✓ / not found ✗ | ✅ |
-| Vibration (short = accepted, long = duplicate/invalid) | ✅ |
-| Settings page with secret code + Copy | ✅ |
-| Dark mode | ✅ |
-| Tested on Android device | ⏳ |
-
 ## How it works
 
 ```

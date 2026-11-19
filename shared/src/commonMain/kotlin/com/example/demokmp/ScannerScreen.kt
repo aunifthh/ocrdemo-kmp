@@ -25,7 +25,11 @@ enum class ScanMode { NONE, QR, TEXT, TYPE }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScannerScreen() {
-    val scanned = remember { mutableStateListOf<String>() }
+    val scanned = remember {
+        mutableStateListOf<String>().apply {
+            addAll(loadScanned())
+        }
+    }
     var input by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
     val secretCode = remember { getSecretCode() }
@@ -33,7 +37,11 @@ fun ScannerScreen() {
     var showSettings by remember { mutableStateOf(false) }
     val clipboard = LocalClipboardManager.current
     val scope = rememberCoroutineScope()
-    val status = remember { mutableStateMapOf<String, String>() }
+    val status = remember {
+        mutableStateMapOf<String, String>().apply {
+            scanned.forEach { put(it, "waiting for PC…") }
+        }
+    }
 
     // ONE place for the rules — used by QR, text camera and typing
     fun addDo(raw: String) {
@@ -43,6 +51,7 @@ fun ScannerScreen() {
             n in scanned  -> { message = "$n already scanned"; vibrate(false) }
             else -> {
                 scanned.add(n)
+                saveScanned(scanned)
                 status[n] = "sending…"
                 message = "Added $n"
                 vibrate(true)
@@ -72,7 +81,7 @@ fun ScannerScreen() {
                 SettingsScreen(
                     secretCode = secretCode,
                     onCopy = { clipboard.setText(AnnotatedString(secretCode)); message = "Code copied" },
-                    onClear = { scanned.clear(); status.clear(); message = "List cleared" },
+                    onClear = { scanned.clear(); status.clear(); saveScanned(emptyList()); message = "List cleared" },
                     onBack = { showSettings = false }
                 )
             } else {
